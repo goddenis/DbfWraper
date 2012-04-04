@@ -1,9 +1,9 @@
 package com.goddenis;
 
 import org.xBaseJ.DBF;
-import sun.jdbc.odbc.JdbcOdbcConnection;
+import org.xBaseJ.xBaseJException;
 
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -13,12 +13,16 @@ import java.util.ArrayList;
 public class Wrapper {
     public static void main(String args[]) {
         ArrayList<String> strings = new ArrayList<String>();
-        DBF
+
+        DBF dbf;
         try {
-            sun.jdbc.odbc.JdbcOdbcDriver
-        } catch (SQLException e) {
+            dbf = new DBF("D:\\Projects\\DbfWrapper\\DbfWraper\\TestData\\test.dbf");
+        } catch (xBaseJException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        JdbcOdbcConnection connection = new JdbcOdbcConnection();
+
+        int i = 1;
     }
 }
