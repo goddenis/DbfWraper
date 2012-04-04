@@ -1,0 +1,12 @@
+<conf>
+    <connection_conf>
+        <host>127.0.0.1</host>
+        <base>test_base</base>
+        <user>goddenis</user>
+    </connection_conf>
+    <filds_conf>
+        <field new_name="stub" old_name="TEST1"/>
+        <field new_name="stub" old_name="TEST2"/>
+        <field new_name="stub" old_name="TEST3"/>
+    </filds_conf>
+</conf>
