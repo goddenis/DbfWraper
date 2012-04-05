@@ -1,1 +1,3 @@
-Test
+Wrapper for dbf files.
+
+Reads Dbf creates DDL guerys for insering data from dbf
