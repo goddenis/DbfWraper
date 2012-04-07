@@ -1,10 +1,13 @@
 package com.goddenis;
 
+import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xBaseJ.DBF;
 import org.xBaseJ.xBaseJException;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +18,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: goddenis
@@ -22,6 +27,8 @@ import java.util.ArrayList;
  */
 public class Wrapper {
     DBF dbf;
+    String tableName = "test";
+    Map<Integer, Field> fields = new HashMap<Integer, Field>();
 
     public static void main(String args[]) throws TransformerException, ParserConfigurationException {
 
@@ -42,7 +49,61 @@ public class Wrapper {
         } catch (xBaseJException e) {
             e.printStackTrace();
         }
+
+        try {
+            wrapper.readConfig(new File("D:\\Projects\\DbfWrapper\\DbfWraper\\TestData\\conf.xml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+
+
         int i = 1;
+
+
+    }
+
+    public void readDbf() throws IOException, xBaseJException {
+        String[] strings = new String[dbf.getRecordCount()];
+        String header = "Insert into " + tableName + "(";
+        String body = "";
+        for (Integer i : fields.keySet()) {
+            header = header + fields.get(i).getNewName() + (i != fields.size() ? ", " : " ) values (");
+        }
+        for (int r = 0; r < dbf.getRecordCount(); r++) {
+            body = "";
+            dbf.gotoRecord(r + 1);
+            for (int c = 1; c < dbf.getFieldCount(); c++) {
+                if (dbf.getField(c).isCharField()) {
+                    body = body + "'" + dbf.getField(c).get() + "'";
+                } else {
+                    body = body + dbf.getField(c).get();
+                }
+                body = body + (c == dbf.getFieldCount() ? ")" : ",");
+            }
+            strings[r] = header + body;
+        }
+    }
+
+    public void readConfig(File file) throws IOException, SAXException {
+        DOMParser parser = new DOMParser();
+        parser.parse(file.getPath());
+
+        Document dom = parser.getDocument();
+
+        NodeList fieldsNodes = dom.getElementsByTagName("field");
+
+        for (int i = 0; i < fieldsNodes.getLength(); i++) {
+            Node aNode = fieldsNodes.item(i);
+
+            NamedNodeMap attributes = aNode.getAttributes();
+
+            Field field = new Field();
+            field.setOldName(attributes.getNamedItem("old_name").getNodeValue());
+            field.setNewName(attributes.getNamedItem("new_name").getNodeValue());
+            fields.put(Integer.valueOf(attributes.getNamedItem("i").getNodeValue()), field);
+        }
 
     }
 
@@ -77,6 +138,7 @@ public class Wrapper {
             fildsConf.appendChild(node);
             setAttribute(node, "old_name", dbf.getField(i).getName());
             setAttribute(node, "new_name", "stub");
+            setAttribute(node, "i", String.valueOf(i));
         }
 
         DOMSource domSource = new DOMSource(doc);
