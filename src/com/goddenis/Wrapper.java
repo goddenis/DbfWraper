@@ -16,8 +16,8 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,12 +29,12 @@ public class Wrapper {
     DBF dbf;
     String tableName = "test";
     Map<Integer, Field> fields = new HashMap<Integer, Field>();
+    private File outfile = new File("out.sql");
 
     public static void main(String args[]) throws TransformerException, ParserConfigurationException {
 
         Wrapper wrapper = new Wrapper();
 
-        ArrayList<String> strings = new ArrayList<String>();
 
         try {
             wrapper.dbf = new DBF("D:\\Projects\\DbfWrapper\\DbfWraper\\TestData\\test.dbf");
@@ -57,14 +57,32 @@ public class Wrapper {
         } catch (SAXException e) {
             e.printStackTrace();
         }
+        String[] strings = null;
+        try {
+            strings = wrapper.readDbf();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (xBaseJException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
-
-        int i = 1;
-
+        try {
+            wrapper.writeFile(strings);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    public void readDbf() throws IOException, xBaseJException {
+    private void writeFile(String[] strings) throws IOException {
+        FileWriter writer = new FileWriter(this.outfile);
+        for (int i = 1; i < strings.length; i++) {
+            writer.write(strings[i] + ";\n");
+        }
+        writer.close();
+    }
+
+    public String[] readDbf() throws IOException, xBaseJException {
         String[] strings = new String[dbf.getRecordCount()];
         String header = "Insert into " + tableName + "(";
         String body = "";
@@ -74,16 +92,17 @@ public class Wrapper {
         for (int r = 0; r < dbf.getRecordCount(); r++) {
             body = "";
             dbf.gotoRecord(r + 1);
-            for (int c = 1; c < dbf.getFieldCount(); c++) {
+            for (int c = 1; c <= dbf.getFieldCount(); c++) {
                 if (dbf.getField(c).isCharField()) {
-                    body = body + "'" + dbf.getField(c).get() + "'";
+                    body = body + "'" + dbf.getField(c).get().trim() + "'";
                 } else {
-                    body = body + dbf.getField(c).get();
+                    body = body + dbf.getField(c).get().trim();
                 }
                 body = body + (c == dbf.getFieldCount() ? ")" : ",");
             }
             strings[r] = header + body;
         }
+        return strings;
     }
 
     public void readConfig(File file) throws IOException, SAXException {

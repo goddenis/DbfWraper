@@ -5,8 +5,8 @@
         <user>goddenis</user>
     </connection_conf>
     <filds_conf>
-        <field i="1" new_name="stub" old_name="TEST1"/>
-        <field i="2" new_name="stub" old_name="TEST2"/>
-        <field i="3" new_name="stub" old_name="TEST3"/>
+        <field i="1" new_name="test1" old_name="TEST1"/>
+        <field i="2" new_name="test2" old_name="TEST2"/>
+        <field i="3" new_name="test3" old_name="TEST3"/>
     </filds_conf>
 </conf>
