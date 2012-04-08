@@ -32,51 +32,38 @@ public class Wrapper {
     private File outfile = new File("out.sql");
 
     public static void main(String args[]) throws TransformerException, ParserConfigurationException {
-
         Wrapper wrapper = new Wrapper();
+        if (args != null) {
+            if ("-C".equals(args[0])) {
+                try {
+                    wrapper.dbf = new DBF(args[2]);
+                    wrapper.composeXML(args[1]);
+                } catch (xBaseJException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if ("-R".equals(args[0])) {
+                try {
+                    wrapper.dbf = new DBF(args[2]);
+                    wrapper.readConfig(new File(args[1]));
+                    wrapper.writeFile(wrapper.readDbf());
+                } catch (xBaseJException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    e.printStackTrace();
+                }
 
-
-        try {
-            wrapper.dbf = new DBF("D:\\Projects\\DbfWrapper\\DbfWraper\\TestData\\test.dbf");
-        } catch (xBaseJException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            }
         }
-
-        try {
-            wrapper.composeXML();
-        } catch (xBaseJException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            wrapper.readConfig(new File("D:\\Projects\\DbfWrapper\\DbfWraper\\TestData\\conf.xml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        }
-        String[] strings = null;
-        try {
-            strings = wrapper.readDbf();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (xBaseJException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-
-        try {
-            wrapper.writeFile(strings);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private void writeFile(String[] strings) throws IOException {
         FileWriter writer = new FileWriter(this.outfile);
-        for (int i = 1; i < strings.length; i++) {
+        for (int i = 0; i < strings.length; i++) {
             writer.write(strings[i] + ";\n");
         }
         writer.close();
@@ -126,7 +113,7 @@ public class Wrapper {
 
     }
 
-    public void composeXML() throws TransformerException, ParserConfigurationException, xBaseJException {
+    public void composeXML(String outConf) throws TransformerException, ParserConfigurationException, xBaseJException {
         DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
         DocumentBuilder parser = fact.newDocumentBuilder();
         Document doc = parser.newDocument();
@@ -168,7 +155,7 @@ public class Wrapper {
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-        Result dest = new StreamResult(new File("conf.xml"));
+        Result dest = new StreamResult(new File(outConf));
         transformer.transform(domSource, dest);
     }
 
